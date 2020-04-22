@@ -1,5 +1,3 @@
-对于大多数开发人员，不需要过多了解 Kubernetes 的工作原理和管理方法，这里介绍下使用 Kubernetes 部署应用有哪些好处以及将应用迁移至 Kubernetes 需要哪些必要的准备。
-
 ## 为什么要用Kubernetes
 
 物理机：最开始，应用被部署在物理机上，但由于物理机无法很好的隔离资源，使得不同的应用需要部署在不同的主机，这又导致了资源的巨大浪费。
@@ -8,8 +6,7 @@
 
 容器：
 
-*  容器镜像的创建更简单
-*  容器镜像更易于回滚
+*  容器镜像的创建简单，易于回滚
 *  分离应用程序与基础架构
 *  不同环境的一致性与可移植性
 *  以应用程序为中心的管理
@@ -23,7 +20,15 @@ Kubernetes：
 * 自我修复和自动伸缩：自动重启、替换状态异常的容器，基于不同指标自动扩缩 Pod 数量。
 * 密钥与配置管理：敏感信息单独保存，可以在不重建容器镜像的情况下更新配置。
 
-## 如何提供服务
+## 服务发现、负载均衡、服务访问
+这些都基于 Kubernetes 最核心的资源对象 - **Service**。
+
+### 服务发现
+
+### 负载均衡
+
+### 服务访问
+
 
 ## 如何保证服务可用性
 ### 控制器
@@ -85,5 +90,46 @@ spec:                        # 期望资源达到的状态
 [More...](./components/controller.md)
 
 ### 调度器
+调度器通过 kubernetes 的 watch 机制来发现集群中新创建或未被调度的 Pod，在做调度决定时需要考虑：单独和整体的资源请求、软硬件策略限制、亲和及反亲和要求、数据局域性等。
 
-## 怎样查看日志
+## 怎样实现配置管理
+
+## 怎样排查问题（查看日志）
+传统应用通常会将日志写入本地文件，而容器化应用一般将日志写入到<code>stdout</code>和<code>stderr</code>，容器默认会将日志输出到宿主机的一个 json 文件并通过<code>docker logs</code>命令查看。
+
+但是，如果容器崩溃、被删除或节点故障时，原来的方式将无法继续访问日志，所以应将日志独立于节点或容器的生命周期。
+
+Kubernetes 本身不提供日志收集的解决方案，一般来说主要有以下三种：
+* 在宿主机节点上运行一个 agent 收集日志：比如将 Fluentd 使用 DaemonSet 控制器以守护进程的方式部署在每个节点，并将节点上的所有容器日志推送到统一的后端，但该方法仅适用于收集输出到<code>stdout</code>和<code>stderr</code>的日志。
+
+![logging-with-node-agent](./pictures/logging-with-node-agent.png)
+
+* 使用 sidecar 容器收集日志： 如果应用程序的日志是输出到某个日志文件，上面的方法显然行不通，此时可以在 Pod 中另外启动一个 sidecar 容器将日志重定向到<code>stdout</code>，或是直接使用一个日志采集代理（比如 filebeat）将日志直接推送到后端。
+
+![logging-with-streaming-sidecar](./pictures/logging-with-streaming-sidecar.png)
+
+* 在应用程序的代码中直接将日志推送到后端。
+  
+![logging-from-application](./pictures/logging-from-application.png)
+
+上面三种方法各有利弊，agent 方式采集范围有限，sidecar 方式消耗大量资源，应用程序方式需要修改应用程序代码，应该对症下药。
+> 日志的后端程序多使用 Elasticsearch + Kibana。
+
+## 怎样实现持续发布
+目前主要的方式有如下两种：
+
+### Jenkins
+![jenkins-cicd](./pictures/jenkins-cicd.jpg)
+* 开发人员提交代码到 Gitlab
+* 通过 Gitlab 配置的 Jenkins Webhook 触发 Pipeline 自动构建
+* Jenkins 触发构建任务，执行 Pipeline 脚本中定义的步骤（单元测试 - Maven 构建 - 构建镜像 - 推送镜像）
+* 触发 Kubernetes 更新服务
+
+Jenkins 内部集成了 Kubernetes 插件，服务端通过与部署在 Kubernetes 集群中的 Jenkins 客户端通信实现以上功能。
+
+### Gitlab CI
+![gitlab-ci](./pictures/gitlab-ci.png)
+
+* Gitlab Runner：在 Kubernetes 集群中安装 runner 与 Gitlab 服务端通信
+* Kubernetes Executor：runner 的插件，用于与 Kubernetes 集群通信
+* .gitlab-ci.yml 位于 git 项目根目录的一个文件，记录了 pipeline 的阶段和执行规则

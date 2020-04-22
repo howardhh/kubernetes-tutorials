@@ -1,5 +1,5 @@
 # kubernetes-tutorials
-学习 Kubernetes 已有一段时间，又赶上领导让准备下做个培训，所以将这段时间我个人学习和理解的一些内容记录在此，其中必然诸多纰漏，还望轻喷。
+学习和使用 Kubernetes 已有一段时间，又赶上领导让准备下做个培训，所以将这段时间我个人学习和理解的一些内容记录在此。
 
 ## 介绍
 **Production-Grade Container Orchestration**
