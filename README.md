@@ -1,8 +1,8 @@
 # kubernetes-tutorials
-学习和使用 Kubernetes 已有一段时间，又赶上领导让准备下做个培训，所以将这段时间我个人学习和理解的一些内容记录在此。
 
 ## 介绍
 **Production-Grade Container Orchestration**
+![kubernetes](./pictures/kubernetes.jpg)
 
 [Kubernetes](https://kubernetes.io/)（K8s）是用于自动部署，扩展和管理容器化应用程序的开源系统。部分重要特性如下：
 
@@ -16,11 +16,13 @@
 
 ## 基本概念及组件
 ### Cluster - 集群
-集群是一组**节点**，可以是物理机或虚拟机，<del>甚至可以是容器</del>。节点的角色分为**Master**和**Node**，Master 负责整个集群的管理和控制，Node 负责运行容器应用。开发测试环境中 Master 和 Node 可以部署在相同节点，生产环境则应分开部署。
+集群是一组**节点**，可以是物理机或虚拟机，<del>甚至可以是容器</del>。节点的角色分为**Master**和**Node**，Master 负责整个集群的管理和控制，Node 负责运行容器应用。开发测试环境中 Master 和 Node 可以部署在相同节点（个人学习可以使用 [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)），生产环境则应分开部署。
 ![kubernetes-cluster](./pictures/kubernetes-cluster.png)
 
 ### Container - 容器
-容器是Kubernetes集群中的低级别组件，在上面运行着具体的应用进程。相关内容请参考：[Docker容器介绍](./components/docker.md)
+容器是Kubernetes集群中的低级别组件，在上面运行着具体的应用进程。
+
+[More...](./components/docker.md)
 
 ### Pod
 Pod 是 Kubernetes 最基本的部署调度单元。每个 Pod 由一个或多个业务容器和一个根容器（Pause容器）组成，同一个 Pod 内的容器共享网络命名空间和文件系统，容器间可以通过 localhost 通信。通常，一个Pod表示某个应用的一个实例。
@@ -28,7 +30,7 @@ Pod 是 Kubernetes 最基本的部署调度单元。每个 Pod 由一个或多�
 [More...](./components/pod.md)
 
 ### Service
-Service 是 Kubernetes 最重要的资源对象。Kubernetes 中的 Service 对象可以对应微服务架构中的微服务。Service 定义了服务的访问入口，服务的调用者通过这个地址访问 Service 后端的 Pod 副本实例。Service 通过 Label Selector 同后端的 Pod 副本建立关系，Deployment 保证后端Pod 副本的数量，也就是保证服务的伸缩性。
+Service 是 Kubernetes 最重要的资源对象之一。Kubernetes 中的 Service 对象可以对应微服务架构中的微服务。Service 定义了服务的访问入口，服务的调用者通过这个地址访问 Service 后端的 Pod 副本实例。Service 通过 Label Selector 同后端的 Pod 副本建立关系，Deployment 保证后端Pod 副本的数量，也就是保证服务的伸缩性。
 
 [More...](/.components/service.md)
 
@@ -46,6 +48,9 @@ Master 是 Kubernetes 集群中的控制节点，主要包含如下组件：
 * kube-scheduler：负责 Pod 的调度
 
 [More...](./components/node.md)
+
+### Namespace
+Namespace（命名空间）是在多个用户之间划分集群资源的一种方法，是底层依赖于同一个物理集群的虚拟集群。
 
 ### Etcd
 Etcd是一个分布式的 key-value 存储，作为保存整个集群状态的数据库。
