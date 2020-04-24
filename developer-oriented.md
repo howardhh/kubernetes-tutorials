@@ -27,6 +27,8 @@ Kubernetes 中，由于 Pod 的生命周期有限，重启或销毁时其 IP 地
 
 Service 是一种抽象的对象，定义了一组 Pod 的逻辑集合和一个访问策略。Service 有固定的 IP 和端口，通过 Labels 自动关联后端的 Pod，Kubernetes 内部维护这些关联关系，用户则无需关心访问到哪个后端 Pod。
 
+![service](pictures/service.jpg)
+
 ```yaml
 apiVersion: v1             # 资源对应的接口版本
 kind: Service              # 资源类型
@@ -103,9 +105,13 @@ spec:
 
 ![ingress](pictures/ingress.jpg)
 
+目前我们在开发测试环境提供了两种 Ingress Controller：traefik 和 **F5 BIG-IP Controller**。
+
+![f5bigip](pictures/f5bigip.png)
+
 ## 如何保证服务可用性
 ### 控制器
-控制器通过 apiserver 监控集群的状态，并致力于将当期状态转变为期望的状态。
+控制器（kube-controller-manager）通过 apiserver 监控集群的状态，并致力于将当期状态转变为期望的状态。
 
 副本控制器确保在任何时候都有特定数量的 Pod 副本处于运行状态。当 Pod 被删除、异常终止或中断性维护之后，副本控制器会重新创建，那么即使程序中只有一个 Pod，也应该使用副本控制器创建。副本控制器包括 RelicaSet/ReplicationController/Deployments/StatefulSets/DaemonSet等。
 
@@ -152,11 +158,65 @@ spec:                        # 期望资源达到的状态
 * 有序的、优雅的部署和缩放
 * 有序的、自动的滚动更新
 
+### Horizontal Pod Autoscaling（HPA）
+HPA 通过监控分析 ReplicationController 或 Deployment 控制的所有 Pod 的负载变化情况来确定是否需要调整 Pod 的副本数量，可支持 CPU/内存 等系统指标和自定义监控指标。
+
 ## 数据持久化
-与 Docker 容器仅支持挂载宿主机目录不同，Kubernetes 支持多种形式的[存储卷](https://kubernetes.io/docs/concepts/storage/volumes/)，
+与 Docker 容器仅支持挂载宿主机目录不同，Kubernetes 支持多种形式的[存储卷](https://kubernetes.io/docs/concepts/storage/volumes/)。
+
 * Persistent Volumes（PV）：PV 是对底层共享存储的一种抽象，由管理员创建和配置，常用的底层共享存储技术有Ceph、GlusterFS、NFS等，通过插件进行对接。
 * PersistentVolumeClaims（PVC）：PVC 是用户存储的一种声明，与 Pod 比较类似，Pod 消耗节点资源，PVC 消耗 PV 资源。PVC 可以请求特定的存储空间和访问方式，用户无需关注底层存储细节，直接使用 PVC 即可。
-* Storage Class：
+* Storage Class： 统一管理一类存储，结合 provisioner 提供动态创建 PV 的能力。
+
+![storageclass](pictures/storageclass.jpg)
+
+目前我们在开发测试环境提供基于 NAS 的 nfs 和 基于 rook 的 ceph 存储集群两种持久化存储方案，其中 ceph 存储可以提供块存储、共享存储和对象存储。
+
+## 怎样修改环境变量或配置文件
+许多应用经常会从配置文件或环境变量中读取一些配置信息，Kubernetes 则为我们提供了一个可以向容器中注入配置信息的对象：**ConfigMap**，借此可以将配置信息从应用程序代码中剥离。
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo
+data:
+  player_initial_lives: 3                                  # property-like keys
+  ui_properties_file_name: "user-interface.properties"
+  game.properties: |                                       # file-like keys
+    enemy.types=aliens,monsters
+    player.maximum-lives=5
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo-pod
+spec:
+  containers:
+  - name: demo
+    image: game.example/demo-game
+    env:                                                   # 定义容器中的环境变量
+    - name: PLAYER_INITIAL_LIVES
+      valueFrom:
+        configMapKeyRef:                                   # 从 ConfigMap 中获取环境变量的值
+          name: game-demo
+          key: player_initial_lives
+    - name: UI_PROPERTIES_FILE_NAME
+      valueFrom:
+        configMapKeyRef:
+          name: game-demo
+          key: ui_properties_file_name
+    volumeMounts:                                          # 向容器中挂载文件
+    - name: config
+      mountPath: "/config"
+      readOnly: true
+volumes:
+- name: config
+  configMap:                                               # 将 ConfigMap 下的键值对以文件形式挂载到容器
+    name: game-demo
+```
+
+> 有些应用程序还可能使用 Spring Cloud Config、Apollo、Nacos 等配置中心。 
 
 ## 怎样排查问题（查看日志）
 传统应用通常会将日志写入本地文件，而容器化应用一般将日志写入到<code>stdout</code>和<code>stderr</code>，容器默认会将日志输出到宿主机的一个 json 文件并通过<code>docker logs</code>命令查看。
@@ -197,3 +257,27 @@ Jenkins 内部集成了 Kubernetes 插件，服务端通过与部署在 Kubernet
 * Gitlab Runner：在 Kubernetes 集群中安装 runner 与 Gitlab 服务端通信
 * Kubernetes Executor：runner 的插件，用于与 Kubernetes 集群通信
 * .gitlab-ci.yml 位于 git 项目根目录的一个文件，记录了 pipeline 的阶段和执行规则
+
+## Helm
+Helm 是一个 Kubernetes 的包管理工具，主要解决以下问题：
+* 统一管理、配置和更新分散的 Kubernetes 应用资源文件
+* 将应用的一系列资源当做软件包管理
+* 分发和复用资源模板
+
+> 类似于 Maven
+
+## 监控工具
+Prometheus + Grafana，主要特点如下：
+
+* 具有由 metric 名称和键/值对标识的时间序列数据的多维数据模型
+* 有一个灵活的查询语言
+* 不依赖分布式存储，只和本地磁盘有关
+* 通过 HTTP 的服务拉取时间序列数据
+* 也支持推送的方式来添加时间序列数据
+* 还支持通过服务发现或静态配置发现目标
+* 多种图形和仪表板支持
+
+## Istio
+Connect, secure, control and observe services.
+
+一个对 Kubernetes 友好的微服务框架，或者叫做 Service Mesh（服务网格）。
