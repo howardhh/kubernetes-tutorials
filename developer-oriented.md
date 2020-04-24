@@ -153,7 +153,7 @@ spec:                        # 期望资源达到的状态
 * 有序的、自动的滚动更新
 
 ## 数据持久化
-* Volumes：在 Docker 容器和 Kubernetes 中都有数据卷的概念，
+与 Docker 容器仅支持挂载宿主机目录不同，Kubernetes 支持多种形式的[存储卷](https://kubernetes.io/docs/concepts/storage/volumes/)，
 * Persistent Volumes（PV）：PV 是对底层共享存储的一种抽象，由管理员创建和配置，常用的底层共享存储技术有Ceph、GlusterFS、NFS等，通过插件进行对接。
 * PersistentVolumeClaims（PVC）：PVC 是用户存储的一种声明，与 Pod 比较类似，Pod 消耗节点资源，PVC 消耗 PV 资源。PVC 可以请求特定的存储空间和访问方式，用户无需关注底层存储细节，直接使用 PVC 即可。
 * Storage Class：
