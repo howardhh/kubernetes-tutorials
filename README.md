@@ -4,13 +4,12 @@
 **Production-Grade Container Orchestration**
 ![kubernetes](./pictures/kubernetes.jpg)
 
-[Kubernetes](https://kubernetes.io/)（K8s）是用于自动部署，扩展和管理容器化应用程序的开源系统。部分重要特性如下：
+[Kubernetes](https://kubernetes.io/)（K8s）是用于自动部署，扩展和管理容器化应用程序的开源系统。
 
-* Service discovery and load balancing：无需修改您的应用程序即可使用陌生的服务发现机制。Kubernetes 为容器提供了自己的 IP 地址和一个 DNS 名称，并且可以在它们之间实现负载平衡。
-* Self-healing: 重新启动失败的容器，在节点死亡时替换并重新调度容器，杀死不响应用户定义的健康检查的容器，并且在它们准备好服务之前不会将它们公布给客户端。
-* Automatic bin packing：根据资源需求和其他约束自动放置容器，同时不会牺牲可用性，将任务关键工作负载和尽力服务工作负载进行混合放置，以提高资源利用率并节省更多资源。
-* Automated rollouts and rollbacks：Kubernetes 会逐步推出针对应用或其配置的更改，确保在监视应用程序运行状况的同时，不会终止所有实例。如果出现问题，Kubernetes 会为您回滚更改。充分利用不断成长的部署解决方案生态系统。
-* Horizontal scaling：使用一个简单的命令、一个UI或基于CPU使用情况自动对应用程序进行伸缩。
+* 使用 Docker 对应用程序包装、实例化
+* 以集群的方式运行、管理跨机器的容器
+* 解决Docker跨机器容器之间的通讯问题
+* Kubernetes的自我修复机制使得容器集群总是运行在用户期望的状态
 
 简单来说，Kubernetes 是一个容器管理系统，其中容器在没有特殊情况下即为[Docker](https://www.docker.com/)。同时，Kubernetes 提供了一种规范，可以让你来描述集群的架构，定义服务的最终状态，帮你将系统自动地达到和维持在这个状态。
 
@@ -29,23 +28,29 @@ Pod 是 Kubernetes 最基本的部署调度单元。每个 Pod 由一个或多�
 
 [More...](./components/pod.md)
 
+### Label
+Label 是一个 key-value 键值对，可以附加到各种资源对象上，一个资源对象可以定义任意数量的 Label。
+
 ### Service
 Service 是 Kubernetes 最重要的资源对象之一。Kubernetes 中的 Service 对象可以对应微服务架构中的微服务。Service 定义了服务的访问入口，服务的调用者通过这个地址访问 Service 后端的 Pod 副本实例。Service 通过 Label Selector 同后端的 Pod 副本建立关系，Deployment 保证后端Pod 副本的数量，也就是保证服务的伸缩性。
 
 [More...](/.components/service.md)
+
+![label](./pictures/label.png)
 
 ### Node
 Node 也可称为 Worker，是 Kubernetes 集群中的工作节点，主要包含如下组件：
 
 * kubelet：负责 Pod 的创建、启动、监控、重启、销毁等工作，同时与 Master 节点协作，实现集群管理的基本功能。
 * kube-proxy：实现 Kubernetes Service之间的通信和负载均衡
+*  docker：docker 容器引擎，负责容器的创建和管理
 
 ### Master
 Master 是 Kubernetes 集群中的控制节点，主要包含如下组件：
 
-* kube-apiserver：集群控制的入口，提供 HTTP REST 服务
-* kube-controller-manager：Kubernetes 集群中所有资源对象的自动化控制中心
-* kube-scheduler：负责 Pod 的调度
+* kube-apiserver：集群控制的入口，提供 HTTP REST 服务，所有资源增删改查的唯一途径
+* kube-controller-manager：Kubernetes 集群中所有资源对象的自动化控制中心，当有资源没达到预期状态，则由对应的 controller-manager 自动修复
+* kube-scheduler：主要负责将 Pod 调度到最合适的 Node
 
 [More...](./components/node.md)
 
