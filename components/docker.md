@@ -1,7 +1,7 @@
 <!--
  * @Author: howardhh
  * @Date: 2020-05-22 08:42:09
- * @LastEditTime: 2020-05-22 08:43:14
+ * @LastEditTime: 2020-05-25 13:46:51
  * @LastEditors: Please set LastEditors
  * @Description: Docker Learning
  * @FilePath: \kubernetes-tutorials\components\docker.md
@@ -72,19 +72,27 @@ Docker 引擎是一个 C/S 架构的应用，包含如下主要组件：
 * [Linux](https://docs.docker.com/engine/install/binaries/)：通过不同发行版系统的软件源（<code>yum</code> / <code>apt-get</code>）或二进制包安装。证通开发测试环境[点此](http://11.8.38.55:9080)安装。
 
 ### 镜像操作
-```
+```bash
 docker pull 
 docker push
 docker image ls
 ```
 
 ### 容器操作
-```
+```bash
 docker run -d --name tomcat-demo -p 8080:8080 tomcat:8
 ```
 
 ### 构建应用镜像
+Docker 使用<code>Dockerfile</code>构建镜像。比如我们基于 [tomcat](https://hub.docker.com/_/tomcat?tab=description) 镜像构建一个 java 应用：
+```
+FROM tomcat:8
+```
 
 ### 容器编排
+目前容器编排比较常用的有如下三个工具：
+* Docker-Compose：Docker 提供的一个命令行工具，用来定义和运行多个容器组成的应用程序。仅能管理当前主机上的 Docker。
+* Docker Swarm：Docker 公司自研的用来管理多主机上 Docker 容器的工具。
+* Kubernetes（K8S）：定位与 Docker Swarm 类似，已成为容器编排领域的领导者。
 
 ### DevOps
