@@ -8,13 +8,13 @@
 --> 
 
 # Docker
-<hr>
 
-* Docker 是什么（Introduction，这是啥)
-* Docker 怎样上手（Get started，怎么用)
-* Docker 是否适合我（Who should use，卖给谁）
+* Docker 是什么（Introduction)
+* Docker 怎样上手（Get started)
+* Docker 是否适合我（Who should use）
 
 [zz:举个例子](https://www.zhihu.com/question/48174633/answer/229253704)
+
 <img src="../pictures/baremetal.jpg" width=800px>
 <img src="../pictures/vm.jpg" width=800px>
 <img src="../pictures/container.jpg" width=800px>
@@ -45,8 +45,7 @@ Docker 解决了一个世界级难题：<b>为啥在我这跑的好好的，到�
 Docker 是容器的一种更高级的实现方式，也可以说是容器的代名词，它的前身是 LXC（Linux Container），诞生于2008年。
 LXC 是一种内核轻量级的操作系统层虚拟化技术，可以提供比传统虚拟化更轻量级的虚拟化，主要基于 Namespace 和 Cgroup 两大机制。
 
-<img src="../pictures/Container@2x.png" width=400px /> 
-<img src="../pictures/VM@2x.png" width=400px />
+<img src="../pictures/Container@2x.png" width=400px /> <img src="../pictures/VM@2x.png" width=400px />
 
 ### Docker 引擎
 Docker 引擎是一个 C/S 架构的应用，包含如下主要组件：
@@ -74,7 +73,7 @@ Docker 引擎是一个 C/S 架构的应用，包含如下主要组件：
 
 开发：代码在我机器上跑得好好的，为啥到别人机器上就跪了？<b>一次构建，到处运行</b>。
 运维：用最少的机器跑最多的应用，又给公司省了钱，美滋滋。<b>用最少的资源</b>
-公司：Docker！ 微服务！ DevOps！ K8S！ 整！<b>整合能力，提升效率，优化架构</b> 后浪！
+公司：Docker！ 微服务！ DevOps！ K8S！ 整！<b>整合能力，提升效率，优化架构</b> 
 
 容器的本质是<b>基于镜像的跨环境迁移</b>。
 <hr>
@@ -84,30 +83,50 @@ Docker 引擎是一个 C/S 架构的应用，包含如下主要组件：
 ### 安装
 
 * [Mac](https://docs.docker.com/docker-for-mac/install/) or [Windows](https://docs.docker.com/docker-for-windows/install/)：下载 Docker Desktop
-* [Linux](https://docs.docker.com/engine/install/binaries/)：通过不同发行版系统的软件源（<code>yum</code> / <code>apt-get</code>）或二进制包安装。证通开发测试环境[点此](http://11.8.38.55:9080)安装。
+* [Linux](https://docs.docker.com/engine/install/binaries/)：通过不同发行版系统的软件源（<code>yum</code> / <code>apt-get</code>）或二进制包安装。证通开发测试环境[前往](http://11.8.38.55:9080/kubernetes/docker/)安装。
 
 ### 镜像操作
 ```bash
-docker pull 
-docker push
-docker image ls
+docker image      # 查看可执行命令
+docker pull       # 拉取镜像
+docker push       # 推送镜像
+docker build      # 构建镜像
+docker image ls   # 列出镜像
 ```
 
 ### 容器操作
 ```bash
-docker run -d --name tomcat-demo -p 8080:8080 tomcat:8
+docker container  # 查看可执行命令
+docker run        # 运行容器
+docker logs       # 查看容器日志
+docker exec       # 在容器内执行命令
 ```
+Hands on：快速启动一个 [MySQL](https://hub.docker.com/_/mysql) 实例
 
 ### 构建应用镜像
-Docker 使用<code>Dockerfile</code>构建镜像。比如我们基于 [tomcat](https://hub.docker.com/_/tomcat?tab=description) 镜像构建一个 java 应用：
-```
-FROM tomcat:8
-```
+Docker 使用<code>Dockerfile</code>构建镜像。
+<img src="../pictures/dockerfile.png" width="800px">
+
+Hands on：基于 [tomcat](https://hub.docker.com/_/tomcat?tab=description) 镜像构建一个 java 应用.
 
 ### 容器编排
-目前容器编排比较常用的有如下三个工具：
+目前的容器编排三大工具：
 * Docker-Compose：Docker 提供的一个命令行工具，用来定义和运行多个容器组成的应用程序。仅能管理当前主机上的 Docker。
 * Docker Swarm：Docker 公司自研的用来管理多主机上 Docker 容器的工具。
 * Kubernetes（K8S）：定位与 Docker Swarm 类似，已成为容器编排领域的领导者。
 
-### DevOps
+Hands on：在刚才 tomcat 应用的基础上增加一个 [nginx](https://hub.docker.com/_/nginx) 并使用<code>docker-compose</code>进行编排。
+
+## 使用场景
+
+### 适合
+* 多环境开发：Mac, Windows, Linux
+* 多环境迁移：开发，测试，生产（ydt/ysi/ymt/ypt/ypm/ypd）
+* 多业务模块（微服务），需要隔离
+* 频繁迭代
+* 标准化交付
+* 无状态应用
+
+### 不适合
+* 程序与内核或驱动有较多交互（路由、LVS等网络程序）
+* 数据量大，需要持久化的数据库
