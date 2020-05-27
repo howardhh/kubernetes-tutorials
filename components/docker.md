@@ -110,13 +110,15 @@ docker exec       # 在容器内执行命令
 
 > Tips： Docker 容器基本不支持<code>ssh</code>操作，尽量避免直接修改已启动容器的配置。
 
-> Hands on：快速启动一个 [MySQL](https://hub.docker.com/_/mysql) 实例
+> Hands on：快速启动一个 [Redis](https://hub.docker.com/_/redis) 实例
 
 ### 构建应用镜像
 Docker 使用<code>Dockerfile</code>构建镜像。
 <img src="../pictures/dockerfile.png" width="800px">
 
 > Hands on：基于 [tomcat](https://hub.docker.com/_/tomcat?tab=description) 镜像构建一个 java 应用.
+
+[进阶篇](./dockermore.md)
 
 ### 容器编排
 目前的容器编排三大工具：
