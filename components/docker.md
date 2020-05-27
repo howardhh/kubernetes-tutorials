@@ -127,9 +127,13 @@ Docker 使用<code>Dockerfile</code>构建镜像。
 > Hands on：在刚才 tomcat 应用的基础上增加一个 [nginx](https://hub.docker.com/_/nginx) 并使用<code>docker-compose</code>进行编排。
 
 [Sugar-Kubernetes 自服务演示](http://11.8.38.55:9080/kubernetes/srvindex/)
+
 [Portainer 演示](http://11.8.84.11:39000)
+
 [无认证镜像仓库演示](http://11.8.84.11:8080)
+
 [认证镜像仓库演示](https://11.8.84.11:28443)
+
 [Rancher 演示](https://11.8.84.11:8443)
 
 ### CI/CD
