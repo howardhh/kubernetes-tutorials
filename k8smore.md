@@ -17,6 +17,9 @@
 ## 云原生
 云原生是一种行为方式和设计理念，凡是能够提高云上资源利用率和应用交付效率的行为或方式都是云原生的。
 
+<img src="pictures/cncf1.png" width=800px>
+<img src="pictures/cncf2.png" width=800px>
+
 云原生代表技术包括：容器、微服务、服务网格、不可变基础设施和声明式API。<!-- kubernetes项目编排能力的核心 -->
 <!-- 我要
 　　这铁棒有何用
